@@ -1,0 +1,32 @@
+name: Flat
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '5 4 * * 1'
+
+jobs:
+  make_sqllite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: gitlog
+        run: git log
+      - name: Make SQLite
+        run: |
+          pip install git-history sqlite-utils
+          ls -ltrah
+          git-history file --csv --dialect unix --id id ghhist.db items.txt
+          ls -ltrah
+          sqlite-utils tables ghhist.db --counts
+      - name: Attach built .db artifact to run 
+        uses: actions/upload-artifact@v3
+        with:
+          name: ghhist.db
+          path: ghhist.db
